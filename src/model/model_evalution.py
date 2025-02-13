@@ -2,13 +2,12 @@ import numpy as np
 import pandas as pd
 import pickle
 import json
+import yaml  # Import yaml
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 import logging
+from dvclive import Live  # Correct import
 
-import dvclive as Live
-
-
-# logging configuration
+# Logging configuration
 logger = logging.getLogger('model_evaluation')
 logger.setLevel('DEBUG')
 
@@ -97,26 +96,25 @@ def main():
         
         save_metrics(metrics, 'reports/metrics.json')
         
+        # Ensure correct indentation
         with open("params.yaml", "r") as file:
-    params = yaml.safe_load(file)
+            params = yaml.safe_load(file)  # Fixed indentation
 
-#Log metrics and parameters using dvclive
-    
-    with Live(save_dvc_exp=True) as live:
+        # Log metrics and parameters using dvclive
+        with Live() as live:
+            live.log_metric("accuracy", metrics["accuracy"])
+            live.log_metric("precision", metrics["precision"])
+            live.log_metric("recall", metrics["recall"])
+            live.log_metric("auc", metrics["auc"])
 
-        live.log_metric("accuracy", accuracy)
-        live.log_metric("precision", precision)
-        live.log_metric("recall", recall)
-        live.log_metric("f1", f1)
+            for param, value in params.items():
+                for key, val in value.items():
+                    live.log_param(f'{param}_{key}', val)
 
-
-        for param, value in params.items():
-            for key, val in value.items():
-
-                live.log_param(f'{param}_{key}', val)
     except Exception as e:
         logger.error('Failed to complete the model evaluation process: %s', e)
         print(f"Error: {e}")
+
 
 if __name__ == '__main__':
     main()
