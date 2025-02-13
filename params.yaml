@@ -1,0 +1,8 @@
+#here we store configuration data or hyperparameter tunners so that we can tune it directly from here only
+data_injection:
+  test_size: 0.21
+feature_engineering:
+  max_features: 10
+model_building:
+  n_estimators: 25
+  learning_rate: 0.01
